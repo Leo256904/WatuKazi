@@ -1,9 +1,9 @@
-package com.watukazi.app.models
+package com.example.watukazi.models
 
 data class UserModel(
-    var name: String="",
-    var email: String="",
-    var contact: String="",
-    var password: String="",
-    var userId: String=""
+    var name: String? = null,
+    var email: String? = null,
+    var contact: String? = null,
+    var password: String? = null,
+    var userId: String? = null
 )

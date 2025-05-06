@@ -17,7 +17,18 @@ data class STKPushRequest(
     @SerializedName("PhoneNumber") val phoneNumber: String, // Must match PartyA
     @SerializedName("CallBackURL") val callBackURL: String = Constants.CALLBACK_URL,
     @SerializedName("AccountReference") val accountReference: String = "WatuKaziApp",
-    @SerializedName("TransactionDesc") val transactionDesc: String = "Payment for casual labour"
+    @SerializedName("TransactionDesc") val transactionDesc: String = "Payment for casual labour",
+    val BusinessShortCode: String,
+    val Password: String,
+    val Timestamp: String,
+    val TransactionType: String,
+    val Amount: String,
+    val PartyB: String,
+    val PartyA: String,
+    val PhoneNumber: String,
+    val CallBackURL: String,
+    val AccountReference: String,
+    val TransactionDesc: String
 )
 
 fun getTimestamp(): String {

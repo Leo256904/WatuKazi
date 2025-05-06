@@ -1,26 +1,12 @@
 package com.example.watukazi.ui.theme.screens.workers
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,471 +16,179 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.work.Worker
 import coil.compose.AsyncImage
-import com.example.watukazi.data.ProductViewModel
-import com.example.watukazi.R
-import com.example.watukazi.models.WorkerModel
 import com.example.watukazi.navigation.ROUTE_UPDATE_WORKER
-import com.example.watukazi.navigation.ROUTE_UPDATE_WORKER
+import com.watukazi.app.models.WorkerModel
 import com.watukazi.app.viewmodel.WorkerViewModel
 
-
 @Composable
-
-fun ViewWorkers(navController: NavHostController){
-
-
+fun ViewWorkers(navController: NavHostController) {
     val context = LocalContext.current
-
-
-    val workerRepository = WorkerViewModel()
-
+    val workerRepository = WorkerViewModel<Any>()
 
     val emptyUploadState = remember {
-
-
-        mutableStateOf(
-
-
-            WorkerModel("","","","","",""))
-
-
+        mutableStateOf(WorkerModel("", "", "", "", "", "", ""))
     }
-
 
     val emptyUploadListState = remember {
-
-
         mutableStateListOf<WorkerModel>()
-
-
     }
 
+    // This populates the list in emptyUploadListState via Firebase call
+    workerRepository.viewWorkers(emptyUploadState, emptyUploadListState, context)
 
-    val workers = workerRepository.viewWorkers(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "All Workers",
+            fontSize = 30.sp,
+            fontFamily = FontFamily.SansSerif,
+            color = Color.Black,
+            modifier = Modifier.padding(top = 16.dp)
+        )
 
+        Spacer(modifier = Modifier.height(20.dp))
 
-        emptyUploadState,emptyUploadListState, context)
-
-
-    Column (modifier = Modifier.fillMaxSize(),
-
-
-        horizontalAlignment = Alignment.CenterHorizontally){
-
-
-        Column(
-
-
-            modifier = Modifier.fillMaxSize(),
-
-
-            horizontalAlignment = Alignment.CenterHorizontally
-
-
-        ) {
-
-
-            Text(text = "All Workers",
-
-
-                fontSize = 30.sp,
-
-
-                fontFamily = FontFamily.SansSerif,
-
-
-                color= Color.Black)
-
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-
-
-
-            LazyColumn(){
-
-
-                items(workers){
-
-
-                    WorkerItem(
-
-
-                        workername = it.workername,
-
-
-                        workerskill = it.workerskill,
-
-                        workerphonenumber = it.workerphonenumber,
-
-
-                        workerrate = it.workerrate,
-
-
-                        desc = it.desc,
-
-
-                        workerId = it.workerId,
-
-
-                        imageUrl = it.imageUrl,
-
-
-                        navController = navController,
-
-
-                        workerRepository = workerRepository
-
-
-
-
-
-                    )
-
-
-                }
-
-
-
-
-
+        LazyColumn {
+            items(emptyUploadListState) { worker ->
+                WorkerItem(
+                    workername = worker.workername,
+                    workerskill = worker.workerskill,
+                    workerphonenumber = worker.workerphonenumber,
+                    workerrate = worker.workerrate,
+                    desc = worker.desc,
+                    workerId = worker.workerId,
+                    imageUrl = worker.imageUrl,
+                    navController = navController,
+                    workerRepository = workerRepository
+                )
             }
-
-
         }
-
-
     }
-
-
 }
 
-
 @Composable
-
-
-fun ProductItem(workername:String,workerskill:String,workerphonenumber:String,workerrate:String,
-
-
-                desc: String,workerId:String,imageUrl: String,navController: NavHostController,
-
-
-                workerRepository: WorkerViewModel
-
-
-){
-
-
+fun WorkerItem(
+    workername: String,
+    workerskill: String,
+    workerphonenumber: String,
+    workerrate: String,
+    desc: String,
+    workerId: String,
+    imageUrl: String,
+    navController: NavHostController,
+    workerRepository: WorkerViewModel<Any?>
+) {
     val context = LocalContext.current
 
-
-    Column (modifier = Modifier.fillMaxWidth()){
-
-
-        Card (modifier = Modifier
-
-
+    Card(
+        modifier = Modifier
             .padding(10.dp)
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = Color.Gray)
+    ) {
+        Row(modifier = Modifier.padding(10.dp)) {
+            Column {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(160.dp)
+                )
 
-
-            .height(210.dp),
-
-
-            shape = MaterialTheme.shapes.medium,
-
-
-            colors = CardDefaults.cardColors
-
-
-                (containerColor = Color.Gray))
-
-
-        {
-
-
-            Row {
-
-
-                Column {
-
-
-                    AsyncImage(
-
-
-                        model = imageUrl,
-
-
-                        contentDescription = null,
-
-
-                        contentScale = ContentScale.Crop,
-
-
-                        modifier = Modifier
-
-
-                            .width(200.dp)
-
-
-                            .height(150.dp)
-
-
-                            .padding(10.dp)
-
-
-                    )
-
-
-
-
-
-                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
-
-
-                        Button(onClick = {
-
-
-                            workerRepository.deleteWorker(context,workerId,navController)
-
-
-
-
-
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = {
+                            workerRepository.deleteWorker(context, workerId, navController)
                         },
-
-
-                            shape = RoundedCornerShape(10.dp),
-
-
-                            colors = ButtonDefaults.buttonColors(Color.Red)
-
-
-                        ) {
-
-
-                            Text(text = "REMOVE",
-
-
-                                color = Color.Black,
-
-
-                                fontWeight = FontWeight.Bold,
-
-
-                                fontSize = 16.sp)
-
-
-                        }
-
-
-                        Button(onClick = {
-
-
-                            navController.navigate("$ROUTE_UPDATE_WORKER/$workerId")
-
-
-                        },
-
-
-                            shape = RoundedCornerShape(10.dp),
-
-
-                            colors = ButtonDefaults.buttonColors(Color.Green)
-
-
-                        ) {
-
-
-                            Text(text = "UPDATE",
-
-
-                                color = Color.Black,
-
-
-                                fontWeight = FontWeight.Bold,
-
-
-                                fontSize = 16.sp)
-
-
-                        }
-
-
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Red),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "REMOVE",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
 
+                    Spacer(modifier = Modifier.width(8.dp))
 
-
-
-
+                    Button(
+                        onClick = {
+                            navController.navigate("$ROUTE_UPDATE_WORKER/$workerId")
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Green),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "UPDATE",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
-
-
-                Column (modifier = Modifier
-
-
-                    .padding(vertical = 10.dp, horizontal = 10.dp)
-
-
-                    .verticalScroll(rememberScrollState())){
-
-
-                    Text(text = "WORKER NAME",
-
-
-                        color = Color.Black,
-
-
-                        fontSize = 16.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = workername,
-
-
-                        color = Color.White,
-
-
-                        fontSize = 28.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = "WORKER SKILL",
-
-
-                        color = Color.Black,
-
-
-                        fontSize = 16.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = workerskill,
-
-
-                        color = Color.White,
-
-
-                        fontSize = 28.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-                    Text(text = "WORKER PHONE NUMBER",
-
-
-                        color = Color.Black,
-
-
-                        fontSize = 16.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = workerphonenumber,
-
-
-                        color = Color.White,
-
-
-                        fontSize = 28.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-
-                    Text(text = "WORKER RATE",
-
-
-                        color = Color.Black,
-
-
-                        fontSize = 16.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = workerrate,
-
-
-                        color = Color.White,
-
-
-                        fontSize = 28.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = "DESC",
-
-
-                        color = Color.Black,
-
-
-                        fontSize = 16.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                    Text(text = desc,
-
-
-                        color = Color.White,
-
-
-                        fontSize = 28.sp,
-
-
-                        fontWeight = FontWeight.Bold)
-
-
-                }
-
-
             }
 
+            Spacer(modifier = Modifier.width(10.dp))
 
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f)
+            ) {
+                WorkerInfoText(label = "Name", value = workername)
+                WorkerInfoText(label = "Skill", value = workerskill)
+                WorkerInfoText(label = "Phone", value = workerphonenumber)
+                WorkerInfoText(label = "Rate", value = workerrate)
+                WorkerInfoText(label = "Desc", value = desc)
+            }
         }
-
-
     }
-
-
 }
-
-
-@Preview
-
 
 @Composable
-
-
-fun ViewWorkersPreview(){
-
-
-    ViewWorkers(rememberNavController())
-
-
+fun WorkerInfoText(label: String, value: String) {
+    Text(
+        text = "$label:",
+        color = Color.Black,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Bold
+    )
+    Text(
+        text = value,
+        color = Color.White,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 4.dp)
+    )
 }
+
+@Preview
+@Composable
+fun ViewWorkersPreview() {
+    ViewWorkers(navController = rememberNavController())
+}
+

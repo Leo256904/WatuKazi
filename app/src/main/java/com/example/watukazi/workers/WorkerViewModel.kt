@@ -1,68 +1,135 @@
 package com.watukazi.app.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.Worker
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.google.firebase.database.*
+import com.watukazi.app.models.*
+import com.watukazi.app.api.ImgurApiService
 import com.watukazi.app.daraja.STKPushRequest
-import com.watukazi.app.models.Worker
-import com.watukazi.app.models.STKPushRequest
-import com.watukazi.app.models.AccessTokenResponse
-import com.watukazi.app.models.STKPushResponse
 import com.watukazi.app.network.RetrofitSafaricomClient
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.watukazi.navigation.ROUTE_VIEW_WORKERS
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 class WorkerViewModel : ViewModel() {
+    private val database = FirebaseDatabase.getInstance().reference.child("Workers")
 
-    private val _workerList = MutableStateFlow<List<Worker>>(emptyList())
-    val workerList = _workerList.asStateFlow()
+    private fun getImgurService(): ImgurApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        val client = OkHttpClient.Builder().addInterceptor(logging).build()
 
-    private val db = FirebaseFirestore.getInstance()
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.imgur.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
 
-    fun loadWorkersFromFirebase() {
-        db.collection("workers")
-            .get()
-            .addOnSuccessListener { result ->
-                val workers = result.map { doc ->
-                }
-                Worker(
-                    id = doc.id,
-                    name = doc.getString("name") ?: "",
-                    skill = doc.getString("skill") ?: "",
-                    rate = doc.getString("rate") ?: "0",
-                    phone = doc.getString("phone") ?: ""
-                )
-                _workerList.value = workers
-            }
-            .addOnFailureListener {
-                Log.e("FIRESTORE", "Error fetching workers: ${it.message}")
-            }
+        return retrofit.create(ImgurApiService::class.java)
     }
 
-    fun deleteWorker(workerId: String) {
-        db.collection("workers").document(workerId)
-            .delete()
-            .addOnSuccessListener {
-                loadWorkersFromFirebase() // Refresh list
+    private fun getFileFromUri(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val file = File.createTempFile("temp_image", ".jpg", context.cacheDir)
+            file.outputStream().use { output -> inputStream?.copyTo(output) }
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun uploadWorkerWithImage(
+        uri: Uri,
+        context: Context,
+        workername: String,
+        workerskill: String,
+        workerphonenumber: String,
+        workerrate: String,
+        desc: String,
+        navController: NavController
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val file = getFileFromUri(context, uri)
+                if (file == null) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                val body = MultipartBody.Part.createFormData("image", file.name, reqFile)
+
+                val response = getImgurService().uploadImage(body).execute()
+
+                if (response.isSuccessful) {
+                    val imageUrl = response.body()?.data?.link ?: ""
+                    val workerId = database.push().key ?: ""
+                    val worker = WorkerModel(
+                        workername, workerskill, workerrate, workerphonenumber, desc, imageUrl, workerId
+                    )
+
+                    database.child(workerId).setValue(worker)
+                        .addOnSuccessListener {
+                            viewModelScope.launch {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, "Worker saved successfully", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(ROUTE_VIEW_WORKERS)
+                                }
+                            }
+                        }.addOnFailureListener {
+                            viewModelScope.launch {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, "Failed to save worker", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Image upload failed", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Exception: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
             }
-            .addOnFailureListener {
-                Log.e("FIRESTORE", "Error deleting worker: ${it.message}")
-            }
+        }
     }
 
     fun initiateSTKPush(phone: String, amount: String = "1") {
-        val consumerKey = "PLQyzax3E5NwaER5aKR17QCsKWsGWQ3HwPh6qAfM3aVYAns9"
-        val consumerSecret = "PaIzn3WxcOebHUsnxLeJ0ZwA3bfgNPxYCcX0VAa8Bt00T94cKf6jndbeAGL3kK4t"
-        val passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+        val consumerKey = "YOUR_KEY"
+        val consumerSecret = "YOUR_SECRET"
+        val passkey = "YOUR_PASSKEY"
 
         val basicAuth = "Basic " + Base64.encodeToString(
             "$consumerKey:$consumerSecret".toByteArray(), Base64.NO_WRAP
@@ -79,13 +146,13 @@ class WorkerViewModel : ViewModel() {
 
                     val stkPushRequest = STKPushRequest(
                         BusinessShortCode = "174379",
-                        Password = password,
-                        Timestamp = timestamp,
+                        Password = "password",
+                        Timestamp = "timestamp",
                         TransactionType = "CustomerPayBillOnline",
-                        Amount = amount,
-                        PartyA = "600977",
+                        Amount = "amount",
+                        PartyA = "phone",
                         PartyB = "600000",
-                        PhoneNumber = "0718337346",
+                        PhoneNumber = "phone",
                         CallBackURL = "https://mywatukazi.mock/callback",
                         AccountReference = "WatuKazi",
                         TransactionDesc = "Payment for labor"
@@ -120,5 +187,63 @@ class WorkerViewModel : ViewModel() {
         val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
         return sdf.format(Date())
     }
-}
 
+    fun updateWorker(
+        context: Context,
+        navController: NavController,
+        workername: String,
+        workerskill: String,
+        workerphonenumber: String,
+        workerrate: String,
+        desc: String,
+        workerId: String
+    ) {
+        val updatedWorker = mapOf(
+            "workername" to workername,
+            "workerskill" to workerskill,
+            "workerphonenumber" to workerphonenumber,
+            "workerrate" to workerrate,
+            "desc" to desc
+        )
+
+        database.child(workerId).updateChildren(updatedWorker)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Worker updated", Toast.LENGTH_SHORT).show()
+                navController.navigate(ROUTE_VIEW_WORKERS)
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Update failed: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun deleteWorker(context: Context, workerId: String, navController: NavHostController) {
+        database.child(workerId).removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(context, "Worker deleted", Toast.LENGTH_SHORT).show()
+                navController.navigate(ROUTE_VIEW_WORKERS)
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Delete failed: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun viewWorkers(
+        emptyUploadState: MutableState<WorkerModel>,
+        emptyUploadListState: SnapshotStateList<WorkerModel>,
+        context: Context
+    ) {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                emptyUploadListState.clear()
+                for (child in snapshot.children) {
+                    val worker = child.getValue(WorkerModel::class.java)
+                    worker?.let { emptyUploadListState.add(it) }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+}

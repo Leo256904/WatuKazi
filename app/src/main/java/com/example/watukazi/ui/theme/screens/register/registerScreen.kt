@@ -1,25 +1,13 @@
 package com.example.watukazi.ui.theme.screens.register
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -29,11 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,19 +32,20 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.unit.height
+import com.example.watukazi.auth.AuthViewModel
 import com.example.watukazi.navigation.ROUTE_LOGIN
 
 @Composable
-fun <AuthViewModel> SignUpScreen(navController: NavController) {
-    val authViewModel: AuthViewModel= viewModel()
+fun SignUpScreen(navController: NavController, authViewModel: AuthViewModel) {
+    // Properly using the ViewModel
+    val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var contact by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val purpleColor = Color(0xFFBF00FF) // Bright purple color
-    val passwordVisible by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) } // Change val to var to allow mutation
 
     Box(
         modifier = Modifier
@@ -74,7 +59,7 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
         ) {
             // Back button
             IconButton(
-                onClick = { /* Handle back navigation */ },
+                onClick = { navController.popBackStack() }, // Handle back navigation
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .align(Alignment.Start)
@@ -97,7 +82,7 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
 
             // Subtitle
             Text(
-                text = "Sign up with one of following options.",
+                text = "Sign up with one of the following options.",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
@@ -154,9 +139,9 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Email field
+            // Name field
             Text(
-                text =  "Name",
+                text = "Name",
                 color = Color.White,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -186,7 +171,6 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
                         label = { Text(text = "Enter your name") },
                         placeholder = { Text(text = "Please enter your name") },
                         modifier = Modifier.fillMaxWidth()
-
                     )
                     Icon(
                         imageVector = Icons.Default.Person,
@@ -198,7 +182,6 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
 
             // Email field
             Text(
@@ -217,13 +200,13 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
                     .border(
                         width = 1.dp,
                         color = Color(0xFF333333),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 20.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
@@ -232,19 +215,19 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
                         label = { Text(text = "Enter your email") },
                         placeholder = { Text(text = "Please enter your email") },
                         modifier = Modifier.fillMaxWidth()
-
                     )
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Validated",
                         tint = purpleColor,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Contact field
             Text(
                 text = "Contact",
                 color = Color.White,
@@ -273,10 +256,9 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
                     OutlinedTextField(
                         value = contact,
                         onValueChange = { contact = it },
-                        label = { Text(text = "Enter your Phone Number") },
+                        label = { Text(text = "Enter your phone number") },
                         placeholder = { Text(text = "Please enter your phone number") },
                         modifier = Modifier.fillMaxWidth()
-
                     )
                     Icon(
                         imageVector = Icons.Default.Call,
@@ -288,8 +270,8 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-//
-//             Password field
+
+            // Password field
             Text(
                 text = "Password",
                 color = Color.White,
@@ -321,7 +303,8 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
                         label = { Text(text = "Enter your password") },
                         placeholder = { Text(text = "Please enter your password") },
                         modifier = Modifier.fillMaxWidth(),
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation())
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+                    )
 
                     Icon(
                         imageVector = Icons.Default.Lock,
@@ -337,50 +320,49 @@ fun <AuthViewModel> SignUpScreen(navController: NavController) {
             // Create Account button
             Button(
                 onClick = {
-                    authViewModel.signup(name,email,contact,password,navController,context)
+                    authViewModel.signup(name, email, contact, password, navController, context)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = purpleColor)
-            ) {
-                Text(
-                    text = "Create Account",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFBF00FF),
+                    contentColor = Color.White
                 )
+            ) {
+                Text(text = "Create Account")
             }
 
-            // Login text
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Login redirection
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = "Already have an account?",
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Log in",
-                    color = Color.White,
+                    text = " Login",
+                    color = purpleColor,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        navController.navigate(ROUTE_LOGIN)
-                    }
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(ROUTE_LOGIN) // Navigate to login screen
+                        }
+                        .padding(start = 4.dp)
                 )
             }
         }
     }
 }
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpScreenPreview() {
-
-    SignUpScreen<Any>(rememberNavController())
-
+    SignUpScreen(rememberNavController(), authViewModel)
 }

@@ -5,12 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.google.firebase.firestore.FirebaseFirestore
 import com.watukazi.app.models.WorkerModel
 import java.util.*
 
 @Composable
-fun AddWorkerScreen() {
+fun AddWorkerScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var skill by remember { mutableStateOf("") }
     var rate by remember { mutableStateOf("") }

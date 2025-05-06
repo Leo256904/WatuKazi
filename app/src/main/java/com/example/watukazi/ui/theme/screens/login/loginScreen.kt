@@ -43,11 +43,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.watukazi.auth.AuthViewModel
 import com.example.watukazi.navigation.ROUTE_REGISTER
-import com.watukazi.app.auth.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
     val authViewModel: AuthViewModel = viewModel()
     var email by remember { mutableStateOf("") }
@@ -281,6 +281,6 @@ fun LoginScreen(navController: NavController) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(rememberNavController())
+    LoginScreen(rememberNavController(), authViewModel)
 
 }
