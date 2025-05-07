@@ -156,7 +156,7 @@ fun UpdateWorkerScreen(
                     workerphonenumber = workerphonenumber,
                     workerrate = workerrate,
                     desc = desc,
-                    productId = workerId
+                    workerId = workerId
                 )
             }) {
                 Text("UPDATE")

@@ -13,6 +13,7 @@ data class WorkerModel(
     val workerrate: String = "",
     val desc: String = "",
     val workerId: String = "",
+    val description: String,
 )
 
 

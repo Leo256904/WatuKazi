@@ -32,7 +32,7 @@ fun SplashScreen(onNavigateToNext: () -> Unit){
                 modifier = Modifier.size(200.dp))
             Text(text = "Welcome to WatuKazi Mobile App",
                 color = Color.White,
-                fontSize = 28.sp)
+                fontSize = 15.sp)
         }
     }
 }

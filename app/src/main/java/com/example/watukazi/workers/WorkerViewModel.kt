@@ -34,7 +34,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WorkerViewModel : ViewModel() {
+class WorkerViewModel<T> : ViewModel() {
     private val database = FirebaseDatabase.getInstance().reference.child("Workers")
 
     private fun getImgurService(): ImgurApiService {
@@ -93,7 +93,14 @@ class WorkerViewModel : ViewModel() {
                     val imageUrl = response.body()?.data?.link ?: ""
                     val workerId = database.push().key ?: ""
                     val worker = WorkerModel(
-                        workername, workerskill, workerrate, workerphonenumber, desc, imageUrl, workerId
+                        workername,
+                        workerskill,
+                        workerrate,
+                        workerphonenumber,
+                        desc,
+                        imageUrl,
+                        workerId,
+                        description = description
                     )
 
                     database.child(workerId).setValue(worker)
@@ -127,9 +134,10 @@ class WorkerViewModel : ViewModel() {
     }
 
     fun initiateSTKPush(phone: String, amount: String = "1") {
-        val consumerKey = "YOUR_KEY"
-        val consumerSecret = "YOUR_SECRET"
-        val passkey = "YOUR_PASSKEY"
+        val consumerKey = "bfb279f9aa9bdbcf4b65f26c72d1b7b4"
+        val consumerSecret = "9b2197c3343b8b4e6f3f31e7b20e2d95"
+        val passkey = "bfb279f9aa9bdbcf4b65f26c72d1b7b4f41b6b22f6b7f72d38b5a4fc6f2c3b2c"
+
 
         val basicAuth = "Basic " + Base64.encodeToString(
             "$consumerKey:$consumerSecret".toByteArray(), Base64.NO_WRAP
@@ -145,17 +153,17 @@ class WorkerViewModel : ViewModel() {
                     )
 
                     val stkPushRequest = STKPushRequest(
-                        BusinessShortCode = "174379",
-                        Password = "password",
-                        Timestamp = "timestamp",
-                        TransactionType = "CustomerPayBillOnline",
-                        Amount = "amount",
-                        PartyA = "phone",
-                        PartyB = "600000",
-                        PhoneNumber = "phone",
-                        CallBackURL = "https://mywatukazi.mock/callback",
-                        AccountReference = "WatuKazi",
-                        TransactionDesc = "Payment for labor"
+                        businessShortCode = "174379",
+                        password = password,
+                        timestamp = timestamp,
+                        transactionType = "CustomerPayBillOnline",
+                        amount = amount,
+                        partyA = phone,
+                        partyB = "174379",
+                        phoneNumber = "254718337346",
+                        callBackURL = "https://mywatukazi.mock/callback",
+                        accountReference = "WatuKazi",
+                        transactionDesc = "Payment for labor"
                     )
 
                     RetrofitSafaricomClient.api.initiateStkPush(accessToken, stkPushRequest)

@@ -34,7 +34,8 @@ fun ViewWorkers(navController: NavHostController) {
     val workerRepository = WorkerViewModel<Any>()
 
     val emptyUploadState = remember {
-        mutableStateOf(WorkerModel("", "", "", "", "", "", ""))
+        val description = ""
+        mutableStateOf(WorkerModel("", "", "", "", "", "", "", description = description))
     }
 
     val emptyUploadListState = remember {
@@ -88,7 +89,7 @@ fun WorkerItem(
     workerId: String,
     imageUrl: String,
     navController: NavHostController,
-    workerRepository: WorkerViewModel<Any?>
+    workerRepository: WorkerViewModel<Any>
 ) {
     val context = LocalContext.current
 

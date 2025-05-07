@@ -37,8 +37,6 @@ import com.example.watukazi.navigation.ROUTE_LOGIN
 
 @Composable
 fun SignUpScreen(navController: NavController, authViewModel: AuthViewModel) {
-    // Properly using the ViewModel
-    val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -364,5 +362,5 @@ fun SignUpScreen(navController: NavController, authViewModel: AuthViewModel) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpScreenPreview() {
-    SignUpScreen(rememberNavController(), authViewModel)
+    SignUpScreen(rememberNavController(), viewModel())
 }

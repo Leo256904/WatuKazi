@@ -3,16 +3,7 @@ package com.example.watukazi.ui.theme.screens.login
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -49,7 +40,6 @@ import com.example.watukazi.navigation.ROUTE_REGISTER
 @Composable
 fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
-    val authViewModel: AuthViewModel = viewModel()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val purpleColor = Color(0xFFBF00FF) // Bright purple color
@@ -139,7 +129,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                 }
             }
 
-
             // Email field
             Text(
                 text = "Email",
@@ -172,7 +161,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         label = { Text(text = "Enter your email") },
                         placeholder = { Text(text = "Please enter your email") },
                         modifier = Modifier.fillMaxWidth()
-
                     )
                     Icon(
                         imageVector = Icons.Default.Email,
@@ -231,13 +219,12 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-
-
             // Login button
             Button(
                 onClick = {
-                    authViewModel.login( email, password, navController, context)
-                }, modifier = Modifier
+                    authViewModel.login(email, password, navController, context)
+                },
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
@@ -250,22 +237,11 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                 )
             }
 
-//            Spacer(modifier = Modifier
-////
-//             Sign up text
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(bottom = 24.dp),
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                Text(
-//                    text = "Don't have an account? ",
-//                    color = Color.Gray,
-//                    fontSize = 14.sp
-//                )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sign up text
             Text(
-                text = "Sign up",
+                text = "Don't have an account? Sign up",
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -276,11 +252,9 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 }
-//    }
-//}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(rememberNavController(), authViewModel)
-
+    LoginScreen(rememberNavController(), viewModel())
 }

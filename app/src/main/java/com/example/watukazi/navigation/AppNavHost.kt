@@ -2,7 +2,7 @@ package com.watukazi.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.core.splashscreen.SplashScreen
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,7 +25,7 @@ import com.watukazi.app.workers.AddWorkerScreen
 
 
 @Composable
-fun AppNavHost(
+fun <T> AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel = viewModel()
 ) {
@@ -33,9 +33,9 @@ fun AppNavHost(
         navController = navController,
         startDestination = ROUTE_SPLASH
     ) {
-//        composable(ROUTE_SPLASH) {
-//            SplashScreen(navController)
-//        }
+        composable(ROUTE_SPLASH) { SplashScreen {
+            navController.navigate(ROUTE_REGISTER){
+                popUpTo(ROUTE_SPLASH){inclusive=true}} }}
 
         composable(ROUTE_REGISTER) {
             SignUpScreen(navController, authViewModel)
@@ -56,7 +56,7 @@ fun AppNavHost(
         composable(ROUTE_UPDATE_WORKER) {
             UpdateWorkerScreen(
                 navController,
-                productId = TODO()
+                workerId = TODO()
             )
         }
 
