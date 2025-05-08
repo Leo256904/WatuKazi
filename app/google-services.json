@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "896061504575",
-    "project_id": "watukaziapp",
-    "storage_bucket": "watukaziapp.firebasestorage.app"
+    "project_number": "404079532337",
+    "project_id": "watukaziapp-ab0f8",
+    "storage_bucket": "watukaziapp-ab0f8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:896061504575:android:3baf1b268e66365ce08c8a",
+        "mobilesdk_app_id": "1:404079532337:android:abdb0b2c8a0c1f2ee3b810",
         "android_client_info": {
           "package_name": "com.example.watukazi"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC5JXC-sxEpw2h2hpkq56gCNBwAJMtsNpw"
+          "current_key": "AIzaSyBpIh3OiAK4v3oQb4SNa8UEgF9NdQNYRBg"
         }
       ],
       "services": {

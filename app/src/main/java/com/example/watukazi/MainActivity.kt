@@ -1,4 +1,3 @@
-
 package com.example.watukazi
 
 import android.os.Bundle

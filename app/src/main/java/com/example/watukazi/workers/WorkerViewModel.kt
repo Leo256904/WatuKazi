@@ -92,6 +92,7 @@ class WorkerViewModel<T> : ViewModel() {
                 if (response.isSuccessful) {
                     val imageUrl = response.body()?.data?.link ?: ""
                     val workerId = database.push().key ?: ""
+                    val description = ""
                     val worker = WorkerModel(
                         workername,
                         workerskill,
